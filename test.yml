@@ -1,0 +1,21 @@
+string: "これは文字列です"
+integer: 42
+float: 3.14
+boolean: true
+null_value: null
+list:
+  - "アイテム1"
+  - "アイテム2"
+  - "アイテム3"
+dictionary:
+  key1: "値1"
+  key2: "値2"
+  key3: "値3"
+first:
+  second:
+    third:
+      fourth: "4番目"
+    third-list:
+      - "リスト1"
+      - "リスト2"
+      - "リスト3"

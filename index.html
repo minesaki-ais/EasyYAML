@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webアプリ</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/0.14.3/react-dom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4/dist/js-yaml.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .input-box {
+            width: 100%;
+            height: 200px;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+        .buttons button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            min-height: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EasyYAML</h1>
+        <p>以下のテキストボックスにYamlファイルの文をコピー&ペーストして、「実行」ボタンを押してください。<br> 結果が下に表示されます。「クリア」ボタンで入力をリセットできます。</p>
+        <textarea class="input-box" id="inputBox"></textarea>
+        <div class="buttons">
+            <button onclick="execute()">実行</button>
+            <button onclick="clearInput()">クリア</button>
+        </div>
+        <div class="result" id="resultBox"></div>
+    </div>
+
+    <script>
+        function execute() {
+            console.log('execute2');
+            const input = document.getElementById('inputBox').value;
+            const isValid = isValidYAML(input);
+            console.log('isValid', isValid);
+            if (isValid[0]) {
+                console.log('isValid[1]', isValid[1]);
+                const data = isValid[1];
+                let variables = '';
+                function createInput(value) {
+                    return `<input type="text" value="${value}" /><br>`;
+                }
+
+                function addInput(button) {
+                    const newInput = createInput('');
+                    button.insertAdjacentHTML('beforebegin', newInput);
+                }
+
+                function removeInput(button) {
+                    if (!button.previousElementSibling || button.previousElementSibling.previousElementSibling.previousElementSibling.tagName !== 'INPUT') {
+                        return;
+                    }
+                    button.previousElementSibling.previousElementSibling.previousElementSibling.remove();
+                    button.previousElementSibling.previousElementSibling.previousElementSibling.remove();
+                }
+
+                function createArrayInputs(array) {
+                    let inputs = '';
+                    array.forEach((item, index) => {
+                        inputs += createInput(item);
+                    });
+                    inputs += `<button onclick="addInput(this)">+</button> <button onclick="removeInput(this)">-</button><br>`;
+                    return inputs;
+                }
+
+                function getRootKey(data, depth) {
+                    for (const key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            const space = '&nbsp;'.repeat(depth * 4);
+                            if (Array.isArray(data[key])) {
+                                variables += `${space}${key}:<br>${createArrayInputs(data[key], space)}`;
+                            } else if (typeof data[key] === 'object') {
+                                variables += `${space}${key}:<br>`;
+                                getRootKey(data[key], depth+1);
+                            } else {
+                                variables += `${space}${key}: ${createInput(data[key])}`;
+                            }
+                        }
+                    }
+                }
+
+                getRootKey(data, 0);
+
+                // Define addInput and removeInput globally
+                window.addInput = addInput;
+                window.removeInput = removeInput;
+                document.getElementById('resultBox').innerHTML = variables;
+            } else {
+                document.getElementById('resultBox').innerText = 'Invalid YAML ';
+            }
+        }
+
+        function isValidYAML(yamlText) {
+            try {
+                const data = jsyaml.load(yamlText);
+                return [true, data];
+            } catch (e) {
+                return [false, yamlText];
+            }
+        }
+
+        function clearInput() {
+            document.getElementById('inputBox').value = '';
+            document.getElementById('resultBox').innerText = '';
+        }
+    </script>
+</body>
+</html>
