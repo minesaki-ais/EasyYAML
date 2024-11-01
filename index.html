@@ -75,11 +75,11 @@
                 setDataDict(data);
                 let variables = '';
                 function createInput(key, value) {
-                    return `<input type="text" value="${value}" /> <div id=${key+"-side"}></div><br>`;
+                    return `<input id="${key}" type="text" value="${value}" oninput="input('${key}', '${value}')" /> <div id="${key}-side" style="display: inline-block; _display: inline;"></div><br>`;
                 }
 
                 function addInput(key, button) {
-                    const newInput = createInput('');
+                    const newInput = createInput(key, '');
                     button.insertAdjacentHTML('beforebegin', newInput);
                 }
 
@@ -91,34 +91,39 @@
                     button.previousElementSibling.previousElementSibling.previousElementSibling.remove();
                 }
 
-                function createArrayInputs(array) {
+                function createArrayInputs(key, array) {
                     let inputs = '';
                     array.forEach((item, index) => {
-                        inputs += createInput(item);
+                        inputs += createInput(key+`.`+index, item);
                     });
                     inputs += `<button onclick="addInput(this)">+</button> <button onclick="removeInput(this)">-</button><br>`;
                     return inputs;
                 }
 
-                function getRootKey(data, depth) {
+                function getRootKey(chainKey, data, depth) {
                     for (const key in data) {
                         if (data.hasOwnProperty(key)) {
+                            let tempKey = "";
+                            if(chainKey == "") {
+                                tempKey = key;
+                            }else{
+                                tempKey = chainKey+`.`+key;
+                            }
                             const space = '&nbsp;'.repeat(depth * 4);
                             if (Array.isArray(data[key])) {
-                                variables += `${space}${key}:<br>${createArrayInputs(data[key], space)}`;
+                                variables += `${space}${key}:<br>${createArrayInputs(tempKey, data[key], space)}`;
                             } else if (typeof data[key] === 'object') {
                                 variables += `${space}${key}:<br>`;
-                                getRootKey(data[key], depth+1);
+                                getRootKey(tempKey, data[key], depth+1);
                             } else {
-                                variables += `${space}${key}: ${createInput(data[key])}`;
+                                variables += `${space}${key}: ${createInput(tempKey, data[key])}`;
                             }
                         }
                     }
                 }
 
-                getRootKey(data, 0);
+                getRootKey("", data, 0);
 
-                // Define addInput and removeInput globally
                 window.addInput = addInput;
                 window.removeInput = removeInput;
                 document.getElementById('resultBox').innerHTML = variables;
@@ -142,12 +147,31 @@
             document.getElementById('outputBox').innerText = '';
         }
 
+        function input(key, value) {
+            console.log(key, value);
+            newValue = document.getElementById(key).value;
+            setData(key, newValue);
+            side = document.getElementById(key+'-side')
+            if (value != newValue) {
+                side.innerHTML = `<button onclick="reset('${key}', '${value}')">リセット</button> <span style="color: gray; font-size: x-small;">元の入力:${value}</span>`;
+            }else{
+                side.innerHTML = ``;
+            }
+        } 
+
+        function reset(key, value) {
+            document.getElementById(key).value = value;
+            document.getElementById(key+'-side').innerHTML = ``;
+        }
+
         function output() {
             if(getNewDataDict()==null){
                 return;
             }
             const yamlText = jsyaml.dump(getNewDataDict());
-            document.getElementById('outputBox').innerText = yamlText;
+            const outputBox = document.getElementById('outputBox')
+            outputBox.style.whiteSpace = "pre";
+            outputBox.innerText = yamlText;
         }
     </script>
 </body>

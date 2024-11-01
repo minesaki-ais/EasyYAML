@@ -13,30 +13,37 @@ function setDataDict(data) {
 
 function getData(key) {
     let data = data_dict;
-    for(key in key.sprit('.')){
-        data = data[key];
+    for(tmp in key.split('.')){
+        data = data[tmp];
     }
     return data;
 }
 
 function getNewData(key) {
     let data = new_data_dict;
-    for(key in key.sprit('.')){
-        data = data[key];
+    for(tmp in key.split('.')){
+        data = data[tmp];
     }
     return data;
 }
 
 function setData(key, value) {
-    let data = new_data_dict;
-    for(key in key.sprit('.')){
-        data = data[key];
+    let keys = key.split('.');
+    new_data_dict = recSetData(new_data_dict, keys, value, 0);
+    return new_data_dict;
+}
+
+function recSetData(data, keys, value, index) {
+    console.log(data, keys, value, index);
+    if(keys.length == index){
+        return value;
     }
-    data = value;
+    data[keys[index]] = recSetData(data[keys[index]], keys, value, index+1);
+    return data;
 }
 
 function isInput(key, value){
-    return (getData(key) == value);
+    return (getData(key) != value);
 }
 
 // class InputBox {
