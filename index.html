@@ -38,43 +38,55 @@
         .result {
             margin-top: 20px;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #fff;
             min-height: 100px;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #8ce2cb;
+            min-height: 100px;
+        }
+        .out-buttons {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>EasyYAML</h1>
-        <p>以下のテキストボックスにYamlファイルの文をコピー&ペーストして、「実行」ボタンを押してください。<br> 結果が下に表示されます。「クリア」ボタンで入力をリセットできます。</p>
+        <p>以下のテキストボックスにYamlファイルの文をコピー&ペーストして、「実行」ボタンを押してください。<br>結果が下に表示されます。「クリア」ボタンで入力をリセットできます。<br>※制作中です。まだ正しく機能しません。</p>
         <textarea class="input-box" id="inputBox"></textarea>
         <div class="buttons">
             <button onclick="execute()">実行</button>
             <button onclick="clearInput()">クリア</button>
         </div>
         <div class="result" id="resultBox"></div>
+        <div class="out-buttons"><button onclick="output()">出力</button></div> 
+        <div class="output" id="outputBox"></div>
     </div>
 
+    <script type="module" src="easyYaml.js"></script>
     <script>
         function execute() {
-            console.log('execute2');
             const input = document.getElementById('inputBox').value;
             const isValid = isValidYAML(input);
-            console.log('isValid', isValid);
             if (isValid[0]) {
-                console.log('isValid[1]', isValid[1]);
                 const data = isValid[1];
+                setDataDict(data);
                 let variables = '';
-                function createInput(value) {
-                    return `<input type="text" value="${value}" /><br>`;
+                function createInput(key, value) {
+                    return `<input type="text" value="${value}" /> <div id=${key+"-side"}></div><br>`;
                 }
 
-                function addInput(button) {
+                function addInput(key, button) {
                     const newInput = createInput('');
                     button.insertAdjacentHTML('beforebegin', newInput);
                 }
 
-                function removeInput(button) {
+                function removeInput(key, button) {
                     if (!button.previousElementSibling || button.previousElementSibling.previousElementSibling.previousElementSibling.tagName !== 'INPUT') {
                         return;
                     }
@@ -130,6 +142,15 @@
         function clearInput() {
             document.getElementById('inputBox').value = '';
             document.getElementById('resultBox').innerText = '';
+            document.getElementById('outputBox').innerText = '';
+        }
+
+        function output() {
+            if(getNewDataDict()==null){
+                return;
+            }
+            const yamlText = jsyaml.dump(getNewDataDict());
+            document.getElementById('outputBox').innerText = yamlText;
         }
     </script>
 </body>
