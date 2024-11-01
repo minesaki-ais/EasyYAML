@@ -54,14 +54,14 @@
 <body>
     <div class="container">
         <h1>EasyYAML</h1>
-        <p>以下のテキストボックスにYamlファイルの文をコピー&ペーストして、「実行」ボタンを押してください。<br>結果が下に表示されます。「クリア」ボタンで入力をリセットできます。<br>※制作中です。まだ正しく機能しません。</p>
+        <p>以下のテキストボックスにYamlファイルの文をコピー&ペーストして、「実行」ボタンを押してください。<br>結果が下に表示されます。「クリア」ボタンで入力をリセットできます。</p>
         <textarea class="input-box" id="inputBox"></textarea>
         <div class="buttons">
             <button onclick="execute()">実行</button>
             <button onclick="clearInput()">クリア</button>
         </div>
         <div class="result" id="resultBox"></div>
-        <div class="out-buttons"><button onclick="output()">出力</button></div> 
+        <div class="out-buttons"><button onclick="copy2clipboard()">クリップボードにコピー</button></div> 
         <div class="output" id="outputBox"></div>
     </div>
 
@@ -120,6 +120,7 @@
                             }
                         }
                     }
+                    output();
                 }
 
                 getRootKey("", data, 0);
@@ -157,11 +158,14 @@
             }else{
                 side.innerHTML = ``;
             }
+            output();
         } 
 
         function reset(key, value) {
             document.getElementById(key).value = value;
             document.getElementById(key+'-side').innerHTML = ``;
+            setData(key, value);
+            output();
         }
 
         function output() {
@@ -172,6 +176,24 @@
             const outputBox = document.getElementById('outputBox')
             outputBox.style.whiteSpace = "pre";
             outputBox.innerText = yamlText;
+        }
+
+        function copy2clipboard() {
+            if (!navigator.clipboard) {
+                alert("残念。このブラウザは対応していません...ｺﾞﾒﾝ...");
+                return;
+            }
+
+            const outputBox = document.getElementById('outputBox')
+            outputBox.style.whiteSpace = "pre";
+
+            navigator.clipboard.writeText(outputBox.innerText).then(
+                () => {
+                alert('クリップボードにコピーしました！');
+                },
+                () => {
+                alert('コピーに失敗しました...大変申し訳ない...orz');
+                });
         }
     </script>
 </body>
